@@ -1,16 +1,28 @@
 'use client';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
 import { Input } from '@/app/components/inputs/input';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Button from '@/app/components/Button';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { AuthSocialButton } from './AuthSocialButton';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
 export const AuthForm = () => {
+  const router = useRouter();
+  const session = useSession();
   const [variant, setVariant] = useState<Variant>('LOGIN');
   const [isLoading, setisLoading] = useState(false);
+  useEffect(() => {
+    if (session?.status === 'authenticated') {
+      router.push('/users');
+    }
+  }, [router, session?.status]);
+
   const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') {
       setVariant('REGISTER');
@@ -36,9 +48,28 @@ export const AuthForm = () => {
 
     if (variant === 'REGISTER') {
       // axios register
+
+      axios
+        .post('/api/register', data)
+        .then(() => signIn('credentials', data))
+        .catch(() => toast.error('Something went wrong!'))
+        .finally(() => setisLoading(false));
     }
     if (variant === 'LOGIN') {
       // nextauth signin
+      signIn('credentials', {
+        ...data,
+        redirect: false,
+      })
+        .then((callback) => {
+          if (callback?.error) {
+            toast.error('Invalid credentials');
+          }
+          if (callback?.ok && !callback?.error) {
+            toast.success('Logged in!');
+          }
+        })
+        .finally(() => setisLoading(false));
     }
   };
 
@@ -47,17 +78,17 @@ export const AuthForm = () => {
 
     //NextAuth social sign in
 
-    // signIn(action, { redirect: false })
-    //   .then((callback) => {
-    //     if (callback?.error) {
-    //       toast.error('Invalid credentials!');
-    //     }
+    signIn(action, { redirect: false })
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error('Invalid credentials!');
+        }
 
-    //     if (callback?.ok) {
-    //       router.push('/conversations');
-    //     }
-    //   })
-    //   .finally(() => setIsLoading(false));
+        if (callback?.ok) {
+          router.push('/conversations');
+        }
+      })
+      .finally(() => setisLoading(false));
   };
   return (
     <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
