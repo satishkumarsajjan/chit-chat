@@ -11,7 +11,7 @@ import Modal from '../modals/Modal';
 import Button from '../Button';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import Input from '../inputs/Input';
+import Input from '../takein/Takein';
 
 interface SettingsModalProps {
   isOpen?: boolean;

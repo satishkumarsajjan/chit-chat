@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import AuthSocialButton from './AuthSocialButton';
 import Button from '@/app/components/Button';
 import { toast } from 'react-hot-toast';
-import Input from '@/app/components/inputs/Input';
+import Input from '@/app/components/takein/Takein';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
